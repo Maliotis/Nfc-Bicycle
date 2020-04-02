@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:id="@+id/list_card_view"
+        android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="250dp"
+            android:id="@+id/recycler_view_card"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="25dp"
+            android:layout_height="wrap_content" />
+
+    <Button
+            android:id="@+id/add_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_marginStart="25dp"
+            android:textAllCaps="false"
+            android:drawablePadding="5dp"
+            android:textColor="@color/com_facebook_blue"
+            android:background="#00000000"
+            android:elevation="0dp"
+            android:drawableLeft="@drawable/ic_add_24px"
+            android:text="Add new card..." />
+
+    <EditText
+            android:layout_width="wrap_content"
+            android:enabled="false"
+            android:focusable="false"
+            android:background="@color/fui_transparent"
+            android:layout_height="wrap_content"/>
+
+</LinearLayout>
