@@ -26,7 +26,7 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.marginBottom
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.room.Room
-import com.example.nfc_.ACTION_PROCESS_ACTIVITY_TRANSITIONS
+import com.example.nfc_.*
 import com.example.nfc_.BuildConfig
 import com.example.nfc_.R
 import com.example.nfc_.activity_trackers.ActivityRecognitionReceiver
@@ -34,12 +34,8 @@ import com.example.nfc_.activity_trackers.initActivityRecognition
 import com.example.nfc_.database.AppDatabase
 import com.example.nfc_.database.entities.RentTransaction
 import com.example.nfc_.database.entities.User
-import com.example.nfc_.fragments.AlertChooseBankDetails
-import com.example.nfc_.fragments.AuthConfirmDialog
-import com.example.nfc_.fragments.MainFragment
-import com.example.nfc_.fragments.PaymentDialogCard
+import com.example.nfc_.fragments.*
 import com.example.nfc_.helpers.*
-import com.example.nfc_.fragments.rentButton
 import com.example.nfc_.helpers.Timer
 import com.example.nfc_.services.ActivityRecognitionService
 import com.example.nfc_.services.TimeCounterService
@@ -140,6 +136,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
         val toolbar: Toolbar = this.findViewById(R.id.toolbar)
+        toolbar.title = ""
         setSupportActionBar(toolbar)
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
@@ -222,20 +219,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     // FIREBASE DATABASE LISTENERS
 
     private fun initFirebaseDatabaseListener() {
-        database.child("/events").addValueEventListener(object: ValueEventListener
+        database.child(buildPathEvents()).addValueEventListener(object: ValueEventListener
         /*database.addValueEventListener(object : ValueEventListener*/ {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 if (firstTime) {
                     val value = dataSnapshot.value
+                    Log.d(TAG, "onDataChange: value = ${value.toString()}")
                     if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
                         val last:HashMap<String, Any> = dataSnapshot.children.last().value as HashMap<String, Any>
                         if (!last.get("type")!!.equals("payment_intent.succeeded")) {
-                            //show error and return
-                            if (::authConfirmDialog.isInitialized) {
-                                authConfirmDialog.dismiss()
-                            }
+
                             val snackbar = Snackbar.make(mainLayout, "The payment was unsuccessful", Snackbar.LENGTH_LONG)//.show()
                             snackbar.addCallback(snackbarCallback())
                             snackbar.show()
@@ -250,16 +245,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         val map0 = (charges.get("data") as ArrayList<*>)[0] as HashMap<*, *>
                         val receiptUrl = map0.get("receipt_url") as String
                         // TODO: instead of showing the receipt store it in db
-                        if (::authConfirmDialog.isInitialized) {
-                            val webView = authConfirmDialog.relativeLayout.getChildAt(0) as WebView
-                            webView.loadUrl(receiptUrl)
-                        } else {
-                            authConfirmDialog = AuthConfirmDialog(
-                                context = this@MainActivity,
-                                url = receiptUrl
-                            )
-                            authConfirmDialog.show(supportFragmentManager, "Confirm")
-                        }
+
+
+
+                        val authConfirmDialog = AuthConfirmDialog(
+                            context = this@MainActivity,
+                            url = receiptUrl
+                        )
+                        supportFragmentManager.beginTransaction().add(authConfirmDialog, "Confirm").commitAllowingStateLoss()
+                        //authConfirmDialog.show(supportFragmentManager, "Confirm")
                         //writeContentToString(receiptUrl)
                     }
                 }; firstTime = true
@@ -286,12 +280,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     val pref = getSharedPreferences("preferenceName", Context.MODE_PRIVATE)
                     val dataSet = pref.getString("card_to_use", null)
                     if (dataSet != null && dataSet.isNotEmpty()) {
+                        Log.d(TAG, "onDataChange: dataSet = %+$dataSet")
+                        Log.d(TAG, "onDataChange: clientSecretKey = $clientSecretKey")
                         val card = Gson().fromJson(dataSet, Card::class.java)
                         stripe(card = card!!, secretKey = clientSecretKey)
                     }
                 }
             }
         })
+
 
     }
 
@@ -333,7 +330,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .setTheme(R.style.AppTheme)
                 .setLogo(R.drawable.nfc_bicycle1)
                 .setAvailableProviders(providers)
-                .setIsSmartLockEnabled(false)
+                .setIsSmartLockEnabled(true)
                 .build(),
             RC_SIGN_IN)
 
@@ -391,15 +388,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         val snackbar = Snackbar.make(mainLayout, "Stripe Payment Was Successful", Snackbar.LENGTH_LONG)
                         snackbar.addCallback(snackbarCallback())
                         snackbar.show()
+
+                        // TODO: empty client secret section as that information is redundant
+                        database.child("/users/${user?.uid?.hashCode().toString()}/client_secret")
+
+                        setRentTransactionToInactive()
+                    } else {
+                        Log.d(TAG, "onSuccess: status = $status")
                     }
-//                    else if (PaymentIntent.Status.RequiresPaymentMethod == status) {
-//                        // attempt authentication again or
-//                        // ask for a new Payment Method
-//                    }
                 }
 
                 override fun onError(e: Exception) {
                     // handle error
+                    Log.e(TAG, "onError: error = ${e.localizedMessage}")
                 }
             })
 
@@ -411,7 +412,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (resultCode == Activity.RESULT_OK) {
                 // Successfully signed in
                 user = FirebaseAuth.getInstance().currentUser
-                secretKeyRef = database.child("/users/${user?.uid?.hashCode().toString()}/client_secret")
+                secretKeyRef = database.child(buildPathClientSecret(user?.uid?.hashCode().toString()))
                 initFirebaseDatabaseListenerForSecretKeyRef()
                 if (!user?.isEmailVerified!!) {
                     user?.sendEmailVerification()?.addOnCompleteListener {
@@ -435,6 +436,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 showLoginScreen()
                 return
             }
+        }
+    }
+
+    private fun setRentTransactionToInactive() {
+        doAsync {
+            val userWithRentTransactions = db.userDao().getUserWithActiveRentTransaction(true, true)
+            var rentTransaction: MutableList<RentTransaction> = mutableListOf()
+            userWithRentTransactions?.rentTransactions?.forEach {
+                if (it.active == true) {
+                    Log.d(TAG, "onSuccess: found active transaction, will set to false")
+                    it.active = false
+                    rentTransaction.add(it)
+                }
+            }
+            if (userWithRentTransactions != null)
+                db.rentTransaction().updateRentTransaction(*rentTransaction.toTypedArray())
         }
     }
 
@@ -469,7 +486,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val valid = isSavedCardToUseValid()
             if (!valid) {
                 val alertChooseBankDetails = AlertChooseBankDetails(this)
-                alertChooseBankDetails.show(supportFragmentManager, "AlertBankDetails")
+                supportFragmentManager.beginTransaction().add(alertChooseBankDetails, "AlertBankDetails").commit()
+                //alertChooseBankDetails.show(supportFragmentManager, "AlertBankDetails")
             } else {
                 setIntent(intent)
                 writeTagOperation(intent)
@@ -562,8 +580,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
+            R.id.nav_home -> {
+                val mainFragment = MainFragment(this)
+                supportFragmentManager
+                    .beginTransaction()
+                    .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+                    .replace(R.id.fragment_placeholder, mainFragment)
+                    .commit()
+            }
             R.id.nav_history -> {
-                // Handle the camera action
+                // Exit for previous fragment
+                val historyFragment = HistoryFragment(this)
+                supportFragmentManager
+                    .beginTransaction()
+                    .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+                    .replace(R.id.fragment_placeholder, historyFragment)
+                    .commit()
             }
             R.id.nav_payment -> {
                 //TODO: show alert dialog for payment
@@ -572,15 +604,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val paymentDialogCard = PaymentDialogCard(this, this)
                 paymentDialogCard.show(supportFragmentManager, "Payment")
             }
-            R.id.nav_slideshow -> {
 
-            }
-            R.id.nav_tools -> {
-
-            }
-            R.id.nav_share -> {
-
-            }
             R.id.nav_logout -> {
                 auth.signOut()
                 showLoginScreen()
@@ -658,7 +682,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Log.i("hashCode", hashCode.toString())
     }
 
-    private fun calculateAmount(pricePerHour: Double): Int {
+    fun calculateAmount(pricePerHour: Double): Int {
         val elapsedTime: Long = Timer.instance()?.getElapsedTime() ?: return 150
         // 0.5£ per hour is 50/60/60/1000 = 0.00001388888 per milliSecond
         val pricePerMilliSecond = pricePerHour / 60L / 60L / 1000L
@@ -671,10 +695,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun addNewRentTransaction() {
         doAsync {
-            val currentTime = Calendar.getInstance().time
+            val currentTime = Timer.instance()?.startTime ?: Calendar.getInstance().timeInMillis
             val user = db.userDao().getUserByEmail(email = user?.email)
             val userId = user?.uid ?: throw RuntimeException("user doesn't exist therefore there should be no transaction")
-            val rentTransaction = RentTransaction(tid = 0, active = true, amount = null, date = currentTime.toString(), userCreatorId = userId)
+            val rentTransaction = RentTransaction(tid = 0, active = true, amount = null, date = currentTime, userCreatorId = userId)
             db.rentTransaction().insertAll(rentTransaction)
         }
     }
@@ -732,6 +756,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     // STRIPE TRANSACTIONS
 
     private fun addUserTransactionToFirebaseDB(userId: String, amount: Int) {
+        Log.d(TAG, "addUserTransactionToFirebaseDB: adding transaction to Firebase")
         val name = user?.displayName
         val userEmail = user?.email
         val userToSave = com.example.nfc_.helpers.User(
@@ -742,8 +767,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         )
         // if user doesn't exist throw exception ... this shouldn't happen...
         if (user == null) throw Exception("User doesn't exist :(")
-
-        database.child("users").child(userId).child("transactions").child(UUID.randomUUID().toString()).setValue(userToSave)
+        Log.d(TAG, "addUserTransactionToFirebaseDB: user.amount = ${userToSave.amount}, user.email = ${userToSave.email}")
+        database.child("users").child(userId).child("transactions").child("PPPPPPPPP" + UUID.randomUUID().toString()).setValue(userToSave)
     }
 
     private fun isSavedCardToUseValid(): Boolean {
@@ -785,6 +810,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         stripe.confirmPayment(this, params)
     }
 
+    override fun onLowMemory() {
+        super.onLowMemory()
+        Log.e(TAG, "onLowMemory: called")
+    }
 }
 
 

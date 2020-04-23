@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:background="@drawable/background_rent_it"
+        app:cardCornerRadius="10dp"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <RelativeLayout
+            android:layout_width="wrap_content"
+            android:background="@android:color/transparent"
+            android:layout_height="wrap_content">
+
+        <ImageView
+                android:id="@+id/cSImageViewTime"
+                android:layout_width="50dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/time"/>
+
+        <TextView
+                android:id="@+id/cSTitleTime"
+                android:layout_width="70dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_toEndOf="@id/cSImageViewTime"
+                android:fontFamily="@font/varela_round"
+                android:gravity="start|center"
+                android:text="Time"
+                android:textColor="@color/darkGreen"/>
+
+        <TextView
+                android:id="@+id/csTimeValue"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_toEndOf="@id/cSTitleTime"
+                android:fontFamily="@font/varela_round"
+                android:gravity="center|end"
+                android:text="--"
+                android:textColor="@color/darkGreen"
+                tools:text="3 hours 2 min" />
+    </RelativeLayout>
+
+
+
+
+</androidx.cardview.widget.CardView>

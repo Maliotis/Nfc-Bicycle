@@ -6,6 +6,9 @@
         <item name="colorPrimary">@color/colorPrimaryDark</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+<!--        <item name="android:textViewStyle">@style/VarelaTextViewStyle</item>-->
+<!--        <item name="android:buttonStyle">@style/VarelaButtonStyle</item>-->
     </style>
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
@@ -21,5 +24,13 @@
         <item name="android:actionBarStyle">@color/colorPrimaryDark</item>
     </style>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+    <style name="VarelaTextViewStyle" parent="android:Widget.TextView">
+        <item name="android:fontFamily">varela_round</item>
+    </style>
+
+    <style name="VarelaButtonStyle" parent="android:Widget.Button">
+        <item name="android:fontFamily">varela_round</item>
+    </style>
 
 </resources>

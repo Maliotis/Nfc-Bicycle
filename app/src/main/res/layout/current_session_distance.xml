@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:background="@drawable/background_rent_it"
+        app:cardCornerRadius="10dp"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <RelativeLayout
+            android:layout_width="wrap_content"
+            android:background="@android:color/transparent"
+            android:layout_height="wrap_content">
+
+    <ImageView
+            android:id="@+id/cSImageViewDistance"
+            android:layout_width="50dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/distance" />
+
+    <TextView
+            android:id="@+id/cSTitleDistance"
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="16dp"
+            android:layout_toEndOf="@id/cSImageViewDistance"
+            android:fontFamily="@font/varela_round"
+            android:gravity="center|start"
+            android:text="Distance"
+            android:textColor="@color/darkGreen" />
+
+    <TextView
+            android:id="@+id/csValueDistance"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_toEndOf="@id/cSTitleDistance"
+            android:fontFamily="@font/varela_round"
+            android:gravity="center|end"
+            android:text="--"
+            android:textColor="@color/darkGreen"
+            tools:text="3.4 km" />
+    </RelativeLayout>
+
+
+
+
+</androidx.cardview.widget.CardView>

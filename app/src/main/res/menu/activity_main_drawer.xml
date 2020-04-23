@@ -5,6 +5,10 @@
 
     <group android:checkableBehavior="single">
         <item
+                android:id="@+id/nav_home"
+                android:icon="@drawable/ic_home"
+                android:title="@string/menu_slideshow"/>
+        <item
                 android:id="@+id/nav_history"
                 android:icon="@drawable/ic_round_history_24px"
                 android:title="@string/menu_history"/>
@@ -13,20 +17,9 @@
                 android:icon="@drawable/ic_baseline_payment_24px"
                 android:title="@string/menu_payment"/>
         <item
-                android:id="@+id/nav_slideshow"
-                android:icon="@drawable/ic_menu_slideshow"
-                android:title="@string/menu_slideshow"/>
-        <item
-                android:id="@+id/nav_tools"
-                android:icon="@drawable/ic_menu_manage"
-                android:title="@string/menu_tools"/>
-        <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="@string/menu_share"/>
-
-        <item android:id="@+id/nav_logout"
-              android:title="@string/menu_logout"/>
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_exit_to_app_24px"
+                android:title="@string/menu_logout"/>
     </group>
 
 </menu>

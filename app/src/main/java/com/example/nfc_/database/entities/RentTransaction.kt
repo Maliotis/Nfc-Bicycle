@@ -12,8 +12,8 @@ import java.util.*
 @Entity
 data class RentTransaction (
     @PrimaryKey(autoGenerate = true) val tid: Int,
-    val active: Boolean?,
+    var active: Boolean?,
     val amount: Double?,
-    val date: String?,
+    val date: Long?,
     val userCreatorId: Int
 )

@@ -1,9 +1,6 @@
 package com.example.nfc_.database.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import com.example.nfc_.database.entities.RentTransaction
 
 
@@ -21,6 +18,9 @@ interface RentTransactionDao {
 
     @Query("SELECT * FROM renttransaction WHERE tid LIKE :transactionId LIMIT 1")
     fun findById(transactionId: Int): RentTransaction
+
+    @Update
+    fun updateRentTransaction(vararg rentTransaction: RentTransaction)
 
     @Insert
     fun insertAll(vararg rentTransactions: RentTransaction)

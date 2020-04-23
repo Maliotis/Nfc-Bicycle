@@ -12,5 +12,5 @@ import com.example.nfc_.database.entities.User
 data class UserWithRentTransactions(
     @Embedded val user: User,
     @Relation(parentColumn = "uid", entityColumn = "userCreatorId")
-    val rentTransactions: List<RentTransaction>
+    val rentTransactions: MutableList<RentTransaction>
 )

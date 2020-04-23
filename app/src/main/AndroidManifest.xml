@@ -19,6 +19,7 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
+            android:debuggable="true"
             tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".activities.HistoryActivity">
 
@@ -68,6 +69,9 @@
                         android:enabled="true"/>
             </intent-filter>
         </receiver>
+        <meta-data
+                android:name="preloaded_fonts"
+                android:resource="@array/preloaded_fonts" />
 
     </application>
 

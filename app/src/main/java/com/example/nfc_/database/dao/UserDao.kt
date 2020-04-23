@@ -22,7 +22,7 @@ interface UserDao {
 
     @Transaction
     @Query("SELECT * FROM user WHERE uid IN (:userIds)")
-    fun loadAllByIds(userIds: IntArray): List<UserWithRentTransactions>
+    fun loadAllByIds(userIds: IntArray): MutableList<UserWithRentTransactions>
 
     @Query("SELECT * FROM user WHERE email IN (:email)")
     fun getUserByEmail(email: String?): User?
@@ -36,6 +36,9 @@ interface UserDao {
         delete(loggedInUser)
         insertAll(loggedInUser)
     }
+
+//    @Update
+//    fun updateUserWithRentTransaction(user: User)
 
     @Insert
     fun insertAll(vararg users: User)
