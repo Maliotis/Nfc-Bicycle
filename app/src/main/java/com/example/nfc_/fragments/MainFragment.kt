@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import com.example.nfc_.R
 import com.example.nfc_.activities.MainActivity
@@ -32,4 +33,6 @@ class MainFragment(private val mainActivity: MainActivity) : Fragment() {
             rentButton(arrayListOf<View>(view), context = mainActivity)
         }
     }
+
+
 }

@@ -17,6 +17,7 @@ import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -40,6 +41,7 @@ import com.example.nfc_.data.constructObject
 import com.example.nfc_.helpers.Timer
 import com.example.nfc_.helpers.dpToPixels
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -128,6 +130,11 @@ class HistoryFragment(private val mainActivity: MainActivity): Fragment(), AppBa
         setLottieAnimation()
 
         appBarLayout.addOnOffsetChangedListener(this)
+        timeCard.elevation = origElevation
+        distanceCard.elevation = origElevation
+        amountCard.elevation = origElevation
+
+
         distanceCard.tag = origElevation
         amountCard.tag = origElevation
 
@@ -197,7 +204,7 @@ class HistoryFragment(private val mainActivity: MainActivity): Fragment(), AppBa
                 // add that to onCompleteAnimation of the fadeAllViewsWithValue
                 collapsedRelativeButton.animate().alpha(0f).duration = 100
                 if (nestedRelativeLayout.marginTop > 0) {
-                    animateNestedRelativeLayout(-marginTopForNestedView)
+                    //animateNestedRelativeLayout(-marginTopForNestedView)
                 }
             }
 
@@ -208,7 +215,7 @@ class HistoryFragment(private val mainActivity: MainActivity): Fragment(), AppBa
                 fadeAllViewsWithValue(0f)
                 // add that to onCompleteAnimation of the fadeAllViewsWithValue
                 collapsedRelativeButton.animate().alpha(1f).duration = 200
-                animateNestedRelativeLayout(marginTopForNestedView)
+                //animateNestedRelativeLayout(marginTopForNestedView)
             }
         }
     }
@@ -218,7 +225,7 @@ class HistoryFragment(private val mainActivity: MainActivity): Fragment(), AppBa
         animator.duration = 150
         animator.addUpdateListener {
             val value = it.animatedValue as Int
-            val layoutParams = nestedRelativeLayout.layoutParams as FrameLayout.LayoutParams
+            val layoutParams = nestedRelativeLayout.layoutParams as CoordinatorLayout.LayoutParams
             layoutParams.setMargins(0, value, 0, 0)
             nestedRelativeLayout.layoutParams = layoutParams
         }
@@ -462,10 +469,16 @@ class HistoryFragment(private val mainActivity: MainActivity): Fragment(), AppBa
     }
 
     private fun getMasterCardBitmap(): Drawable {
+        if (mainActivity.isDarkTheme()) {
+            return resources.getDrawable(R.drawable.ic_mastercard_initial_white, null)
+        }
         return resources.getDrawable(R.drawable.ic_iconfinder_master_card_initial, null)
     }
 
     private fun getVisaBitmap(): Drawable {
+        if (mainActivity.isDarkTheme()) {
+            return resources.getDrawable(R.drawable.ic_visa_initial_white, null)
+        }
         return resources.getDrawable(R.drawable.ic_visa_initial, null)
     }
 }

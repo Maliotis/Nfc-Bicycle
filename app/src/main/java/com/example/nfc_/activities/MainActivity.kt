@@ -5,22 +5,19 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Configuration
+import android.graphics.Rect
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import android.webkit.WebView
+import android.view.*
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.core.view.marginBottom
@@ -56,7 +53,6 @@ import com.stripe.android.*
 import com.stripe.android.model.*
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import org.jetbrains.anko.doAsync
-import java.lang.RuntimeException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -67,6 +63,7 @@ var secretKeyRef: DatabaseReference = database.child("/users/${user?.uid?.hashCo
 var listener: ValueEventListener? = null
 val stripeKey = BuildConfig.stripe_key
 lateinit var stripe: Stripe
+var isDarkTheme = false
 
 const val ACTION_ACTIVITY_RECOGNITION = "com.example.nfc_.activities.Action"
 private val TAG = MainActivity::class.java.canonicalName
@@ -75,7 +72,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     View.OnClickListener {
 
 
-    private lateinit var mainLayout: ConstraintLayout
+    private lateinit var mainLayout: RelativeLayout
     private var isShowingLoginScreen: Boolean = false
     var rentSuccessfully: Boolean = false
     private var firstTime: Boolean = false
@@ -86,6 +83,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val RC_SIGN_UP: Int = 56
 
     private var apiClient: GoogleApiClient? = null
+
+
+    fun isDarkTheme(): Boolean {
+        isDarkTheme = this.resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+
+        return isDarkTheme
+
+    }
 
     // ANDROID - LIFECYCLE
 
@@ -113,6 +119,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -121,9 +128,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             this,
             PaymentConfiguration.getInstance().publishableKey
         )
+        window.decorView.setOnApplyWindowInsetsListener { v, insets ->
+            //v.updatePadding(bottom = -insets.systemWindowInsetBottom)
+            Log.d(TAG, "setOnApplyWindowInsetsListener: called")
+            //findViewById<CoordinatorLayout>(R.id.includeDrawerLayout).setPadding(0,0,0, insets.systemWindowInsetBottom)
+            insets
+        }
         mainLayout = findViewById(R.id.fragment_placeholder)
         val mainFragment = MainFragment(this)
-        supportFragmentManager.beginTransaction().add(R.id.fragment_placeholder, mainFragment).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_placeholder, mainFragment).commit()
         initFirebaseDatabaseListener()
 
         checkIfUserIsLoggedIn()
@@ -188,6 +201,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 //emulateActivityTransitionToBicycle()
             }
 
+        //window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        //window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        //window.navigationBarColor = Color.TRANSPARENT
+        isDarkTheme()
 
     }
 
@@ -330,7 +348,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .setTheme(R.style.AppTheme)
                 .setLogo(R.drawable.nfc_bicycle1)
                 .setAvailableProviders(providers)
-                .setIsSmartLockEnabled(true)
+                .setIsSmartLockEnabled(false)
                 .build(),
             RC_SIGN_IN)
 
@@ -598,11 +616,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     .commit()
             }
             R.id.nav_payment -> {
-                //TODO: show alert dialog for payment
-                //show alert to add payment method
-                //PaymentDialogAdd()
-                val paymentDialogCard = PaymentDialogCard(this, this)
-                paymentDialogCard.show(supportFragmentManager, "Payment")
+                val paymentFragment = PaymentFragment(this)
+                supportFragmentManager
+                    .beginTransaction()
+                    .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+                    .replace(R.id.fragment_placeholder, paymentFragment)
+                    .commit()
             }
 
             R.id.nav_logout -> {
@@ -712,7 +731,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             "Something When wrong emptying Try Again"
         )
         val view = findViewById<View>(R.id.main_content)
-        val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(mainLayout, text, Snackbar.LENGTH_LONG)
         snackbar.addCallback(snackbarCallback())
         snackbar.show()
         if (messageWrittenSuccessfully) {
@@ -737,7 +756,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             "Something When wrong Try Again"
         )
         val view = findViewById<View>(R.id.main_content)
-        val snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(mainLayout, text, Snackbar.LENGTH_LONG)
         snackbar.addCallback(snackbarCallback())
         snackbar.show()
 
@@ -768,7 +787,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // if user doesn't exist throw exception ... this shouldn't happen...
         if (user == null) throw Exception("User doesn't exist :(")
         Log.d(TAG, "addUserTransactionToFirebaseDB: user.amount = ${userToSave.amount}, user.email = ${userToSave.email}")
-        database.child("users").child(userId).child("transactions").child("PPPPPPPPP" + UUID.randomUUID().toString()).setValue(userToSave)
+        database.child("users").child(userId).child("transactions").child(UUID.randomUUID().toString()).setValue(userToSave)
     }
 
     private fun isSavedCardToUseValid(): Boolean {

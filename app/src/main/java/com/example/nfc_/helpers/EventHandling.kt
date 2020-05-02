@@ -7,6 +7,7 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
+import android.graphics.ColorFilter
 import android.nfc.NfcAdapter
 import android.util.DisplayMetrics
 import android.view.View
@@ -18,19 +19,26 @@ import androidx.cardview.widget.CardView
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
+import com.airbnb.lottie.LottieProperty
+import com.airbnb.lottie.SimpleColorFilter
+import com.airbnb.lottie.model.KeyPath
+import com.airbnb.lottie.value.LottieValueCallback
 import com.example.nfc_.NFC_ANIMATE_IMG
+import com.example.nfc_.NFC_ANIMATE_IMG_DARK_THEME
 import com.example.nfc_.activities.MainActivity
 import com.example.nfc_.activities.nfcAdapter
 import kotlinx.coroutines.*
 import org.jetbrains.anko.doAsync
 
 
-var ctx: Activity? = null
+var ctx: MainActivity? = null
 var cardView: CardView? = null
 var cancelButton: Button? = null
 
-fun rentButton(view: ArrayList<View>, context: Activity) {
+fun rentButton(view: ArrayList<View>, context: MainActivity) {
     ctx = context
+    val destWidth = dpToPixels(250f, ctx!!)
+    val destHeight = dpToPixels(350f, ctx!!)
     //Expand the cardView
 
     //TODO enable foreground NFC when the button is pressed
@@ -64,13 +72,13 @@ fun rentButton(view: ArrayList<View>, context: Activity) {
 
     val animWidth = valueAnimatorCardViewWidth(
         cardViewWidth,
-        450,
+        destWidth,
         layoutParams
     )
 
     val animHeight = valueAnimatorCardViewHeight(
         cardViewHeight,
-        550,
+        destHeight,
         layoutParams
     )
 
@@ -79,13 +87,13 @@ fun rentButton(view: ArrayList<View>, context: Activity) {
     val cardViewX = cardView!!.x
     val cardViewY = cardView!!.y
 
-    val endX = calculate("x",450, ctx!!)
+    val endX = calculate("x",destWidth, ctx!!)
     val animX = valueAnimatorCardViewX(
         cardViewX,
         endX
     )
 
-    val endY = calculate("y", 550, ctx!!)
+    val endY = calculate("y", destHeight, ctx!!)
     val animY = valueAnimatorCardViewY(
         cardViewY,
         endY
@@ -108,12 +116,12 @@ fun rentButton(view: ArrayList<View>, context: Activity) {
 
     cancelButton!!.setOnClickListener {
         val animaWidth = valueAnimatorCardViewWidth(
-            450,
+            destWidth,
             cardViewWidth,
             layoutParams!!
         )
         val animaHeight = valueAnimatorCardViewHeight(
-            550,
+            destHeight,
             cardViewHeight,
             layoutParams
         )
@@ -278,7 +286,15 @@ private fun createLottieAnimationView(context: Context): LottieAnimationView {
     var view = LottieAnimationView(context)
     view.apply {
         id = View.generateViewId()
-        setAnimation(NFC_ANIMATE_IMG)
+        if (ctx!!.isDarkTheme()) {
+            setAnimation(NFC_ANIMATE_IMG_DARK_THEME)
+            val filter = SimpleColorFilter(resources.getColor(android.R.color.holo_purple))
+            val keyPath = KeyPath("**")
+            val callback: LottieValueCallback<ColorFilter> = LottieValueCallback(filter)
+            addValueCallback(keyPath, LottieProperty.COLOR_FILTER, callback)
+        } else {
+            setAnimation(NFC_ANIMATE_IMG)
+        }
         playAnimation()
         progress = 0.1F
         repeatCount = LottieDrawable.INFINITE

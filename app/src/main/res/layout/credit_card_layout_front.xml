@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_centerInParent="true"
+        android:layout_width="322dp"
+        android:layout_height="200dp"
+        android:id="@+id/creditCardEditRelativeLayout"
+        android:background="@drawable/background_visa">
+
+    <ImageView
+            android:id="@+id/creditCardEditBrand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="22dp"
+            android:layout_marginTop="22dp"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/ic_visa_initial_white" />
+
+    <com.stripe.android.view.CardNumberEditText
+            android:text="4242 4242 4242 4242"
+            android:textSize="21sp"
+            android:textScaleX="1.29"
+            android:maxLength="19"
+            android:inputType="number"
+            android:singleLine="true"
+            android:textColor="@android:color/white"
+            android:id="@+id/stripeCardNumberEditText"
+            android:layout_width="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_height="45dp"
+            android:layout_marginStart="22dp"
+            android:layout_marginEnd="22dp"
+            android:layout_centerInParent="true"
+            android:backgroundTint="@android:color/white"
+            android:orientation="horizontal">
+    </com.stripe.android.view.CardNumberEditText>
+
+
+    <EditText
+            android:id="@+id/creditCardEditHolderName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="40dp"
+            android:layout_marginBottom="22dp"
+            android:layout_marginStart="22dp"
+            android:hint="Cardholder Name"
+            android:singleLine="true"
+            android:inputType="textCapWords"
+            android:textColorHint="#90FFFFFF"
+            android:backgroundTint="@android:color/white"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/varela_round"
+            android:layout_alignParentBottom="true"/>
+
+    <com.stripe.android.view.ExpiryDateEditText
+            android:id="@+id/creditCardEditExpDate"
+            android:layout_width="48dp"
+            android:maxLength="5"
+            android:singleLine="true"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:textColor="@android:color/white"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="22dp"
+            android:layout_marginEnd="22dp"
+            android:textSize="14sp"
+            android:inputType="number"
+            android:textColorHint="#90FFFFFF"
+            android:backgroundTint="@android:color/white"
+            android:hint="Expire"
+            tools:text=""/>
+
+</RelativeLayout>

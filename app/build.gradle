@@ -73,6 +73,8 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
     implementation "androidx.viewpager2:viewpager2:1.0.0"
+    // BlurView
+    implementation 'com.eightbitlab:blurview:1.6.3'
 
     // Rx
     implementation 'io.reactivex.rxjava2:rxkotlin:2.1.0'
